@@ -62,7 +62,10 @@ public class DoubleArraySeq {
 
 	public void advance()
 	{
-
+		if(isCurrent()) curr++;
+		else{
+			throw new IllegalStateException("There's no current element!")
+		}
 	}
 
 	public DoubleArraySeq clone()

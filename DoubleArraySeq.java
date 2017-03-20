@@ -5,8 +5,8 @@ public class DoubleArraySeq {
 	public DoubleArraySeq()
 	{
 		data = new double[10];
-		int used = 0;
-		int curridx = 0;
+		int items = 0;
+		int curr = 0;
 		
 	}
 
@@ -14,8 +14,8 @@ public class DoubleArraySeq {
 	{
 		if(initialCapacity>0){
 			data = new double[initialCapacity];
-			int used =0;
-			int curridx = 0;
+			int items =0;
+			int curr = 0;
 		}
 		else{
 			throw new IllegalArgumentException("Input argument should be non-negative.");
@@ -24,12 +24,30 @@ public class DoubleArraySeq {
 
 	public void addAfter(double element)
 	{
-		
+		ensureCapacity(items+1);
+		if(isCurrent()){
+
+			for(i=items;i>curr;i--){
+				data[i] = data[i-1];
+			}
+			data[curr+1]=element;
+		}
+		else{
+			data[items]=element
+		}
+		advance();
+		items++;
 	}
 
 	public void addBefore(double element)
 	{
-
+		if(isCurrent()){
+			ensureCapacity(items+1);
+			for(i=items;i>curr-1;i--)
+				data[i] = data[i-1];
+			data[curr]=element;
+			items++;
+		}
 	}
 
 	public void addAll(DoubleArraySeq addend)

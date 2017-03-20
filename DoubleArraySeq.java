@@ -41,13 +41,18 @@ public class DoubleArraySeq {
 
 	public void addBefore(double element)
 	{
+		ensureCapacity(items+1);
 		if(isCurrent()){
-			ensureCapacity(items+1);
 			for(i=items;i>curr-1;i--)
 				data[i] = data[i-1];
 			data[curr]=element;
-			items++;
 		}
+		else{
+			for(i=items;i>0;i--)
+				data[i] = data[i-1];
+			data[0] = element;
+		}
+		items++;
 	}
 
 	public void addAll(DoubleArraySeq addend)

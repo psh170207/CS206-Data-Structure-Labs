@@ -29,40 +29,56 @@ public class DoubleArraySeq implements Cloneable{
 	{
 		ensureCapacity(items+1);
 		if(isCurrent()){
-			for(int i=items-1;i>curr+1;i--)
-				data[i] = data[i-1];
-			data[curr+1]=element;
+			if (curr<items){
+				for(int i=items;i>curr+1;i--)
+					data[i] = data[i-1];
+				data[curr+1]=element;
+				advance();
+			}
+			else
+				data[items]=element;
+				curr = items;
 		}
 		else{
 			data[items]=element;
+			curr = items;
 		}
 		items++;
-		advance();
 	}
 
 	public void addBefore(double element)
 	{
 		ensureCapacity(items+1);
 		if(isCurrent()){
-			for(int i=items-1;i>curr;i--)
-				data[i] = data[i-1];
-			data[curr]=element;
+			if(curr>0){
+				for(int i=items;i>curr;i--)
+					data[i] = data[i-1];
+				data[curr-1]=element;
+				curr--;
+			}
+			else{
+				for(int i=items;i>0;i--)
+					data[i] = data[i-1];
+				data[0] = element;
+				curr = 0;
+			}
 		}
 		else{
 			for(int i=items;i>0;i--)
 				data[i] = data[i-1];
 			data[0] = element;
+			curr = 0;
 		}
 		items++;
 	}
 
 	public void addAll(DoubleArraySeq addend)
 	{
-		if (addend.data != null){
-		ensureCapacity(items+addend.items);
-		//system.copyarray(addend,0,data,items,addend.items);
-		for (int i=items;i<items+addend.items;i++)
-			data[i]=addend.data[i-items];
+		if (addend != null){
+			ensureCapacity(items+addend.items);
+			for (int i=items;i<items+addend.items;i++)
+				data[i]=addend.data[i-items];
+			items += addend.items;
 		}
 		else{
 			throw new NullPointerException("addend is null!");
@@ -71,21 +87,19 @@ public class DoubleArraySeq implements Cloneable{
 
 	public void advance()
 	{
-	/*
 		if(isCurrent()){
 			if(curr==items-1) curr = -1;
 			else curr++;
 		}
 		else{
-			throw new IllegalStateException("There's no current element!");
+			throw new IllegalStateException
+			("Current element does not exist!!");
 		}
-	*/
-		curr++;
 	}
 
 	public DoubleArraySeq clone()
 	{
-		DoubleArraySeq ret;
+		DoubleArraySeq ret = new DoubleArraySeq();
 		try
 		{
 			ret = (DoubleArraySeq) super.clone();
@@ -102,19 +116,20 @@ public class DoubleArraySeq implements Cloneable{
 	{
 		if(s1.data!=null && s2.data!=null){
 			DoubleArraySeq ret = new DoubleArraySeq(s1.data.length+s2.data.length);
-			for(int i=0;i<s1.data.length;i++)
+			for(int i=0;i<s1.items;i++)
 				ret.data[i] = s1.data[i];
-			for(int i=s1.data.length;i<s1.data.length+s2.data.length;i++)
-				ret.data[i] = s2.data[i];
+			for(int i=s1.items;i<s1.items+s2.items;i++)
+				ret.data[i] = s2.data[i-s1.items];
+			ret.items=s1.items+s2.items;
 			return ret;
 		}
-		else throw new NullPointerException("There's null input!");
+		else throw new NullPointerException();
 	}
 
 	public void ensureCapacity(int minimumCapacity)
 	{
 		double[] temp = new double[minimumCapacity];
-		if(minimumCapacity>items){
+		if(minimumCapacity>data.length){
 			for (int i=0;i<items;i++)
 				temp[i]=data[i];
 			data=temp;
@@ -134,17 +149,16 @@ public class DoubleArraySeq implements Cloneable{
 
 	public boolean isCurrent()
 	{
-		boolean answer = false;
-		if(curr <= data.length)
-			answer = true;
-		return answer;
+		if(curr == -1) return false;
+		if(curr<data.length && data[curr]!=0.0d) return true;
+		else return false;
 	}
 
 	public void removeCurrent()
 	{
 		if(isCurrent()){
-			for(int i=curr;i<items-1;i++)
-				data[i]=data[i+1];
+			for(int i=curr+1;i<items;i++)
+				data[i-1]=data[i];
 			items--;
 			ensureCapacity(items);
 			
@@ -168,6 +182,7 @@ public class DoubleArraySeq implements Cloneable{
 		double[] trim = new double[items];
 		for(int i=0;i<items;i++)
 			trim[i] = data[i];
+		//System.arraycopy(data,0,trim,0,items);
 		data=trim;
 	}
 	public static DoubleArraySeq reverse(DoubleArraySeq seq)
@@ -177,6 +192,7 @@ public class DoubleArraySeq implements Cloneable{
 		for(int i=0;i<n;i++){
 			reversed.data[n-i-1]=seq.data[i];
 		}
+		reversed.items = seq.items;
 		return reversed;
 	}
 	public double getMax()
@@ -202,21 +218,19 @@ public class DoubleArraySeq implements Cloneable{
 
 	public DoubleArraySeq insertSeqAt(DoubleArraySeq seq, int index)
 	{
-		if(seq.size()!=0){
-			if(index>=1 && index<=items){
-				int n = seq.data.length;
-				DoubleArraySeq ret = new DoubleArraySeq(n+items);
-				for(int i=0;i<index-1;i++)
-					ret.data[i]=data[i];
-				for(int i=index-1;i<n+index-1;i++)
-					ret.data[i]=seq.data[i-index+1];
-				for(int i=n+index-1;i<n+items;i++)
-					ret.data[i]=data[i-n];
-				return ret;
-			}
-			else throw new IllegalStateException("Unappropriate index!");
+		if(index>0 && index<=items){
+			int n = seq.items;
+			DoubleArraySeq ret = new DoubleArraySeq(n+items);
+			for(int i=0;i<index-1;i++)
+				ret.data[i]=data[i];
+			for(int i=index-1;i<n+index-1;i++)
+				ret.data[i]=seq.data[i-index+1];
+			for(int i=n+index-1;i<n+items;i++)
+				ret.data[i]=data[i-n];
+			ret.items = items + seq.items;
+			return ret;
 		}
-		else throw new NullPointerException("seq is null.");
+		else throw new IllegalArgumentException("Unappropriate index!");
 	}
 
 }

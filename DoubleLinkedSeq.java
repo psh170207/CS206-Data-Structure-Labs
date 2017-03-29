@@ -1,6 +1,6 @@
 package cs206b;
 
-public class DoubleLinkedSeq {
+public class DoubleLinkedSeq implements Cloneable{
 	
 	private int manyNodes;
 	private DoubleNode head;
@@ -95,11 +95,18 @@ public class DoubleLinkedSeq {
 	
 	public Object clone() {
 		try{
-
+			DoubleLinkedSeq ret;
+			try{
+				ret = (DoubleLinkedSeq) super.clone();
+			}
+			catch(CloneNotSupportedException e){
+			 throw new RuntimeException("This class does not implements Cloneable.");
+			}
+			ret.head = DoubleNode.listCopy(head);
+			return ret;
 		} catch(OutOfMemoryError e) {
 			throw new OutOfMemoryError("clone(): Not enough memory for creating new sequence.");
 		}
-		return null;
 	}
 	
 	public static DoubleLinkedSeq concatenation(DoubleLinkedSeq s1, DoubleLinkedSeq s2) {

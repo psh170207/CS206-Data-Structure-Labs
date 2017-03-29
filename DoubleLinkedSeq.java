@@ -9,30 +9,75 @@ public class DoubleLinkedSeq {
 	private DoubleNode precursor;
 	
 	public DoubleLinkedSeq() {
+		manyNodes=0;
+		head = null;
+		tail = head;
+		cursor = head;
+		precursor = null;
 	}
 	
 	public void addAfter(double element) {
 		try{
-			
+			if(isCurrent()){
+				cursor.addNodeAfter(element);
+				advance();
+				tail = cursor;
+			}
+			else{
+				if(manyNodes==0){
+					head = new DoubleNode(element,null);
+					tail = head;
+					cursor = head;
+				}
+				else{
+					tail.addNodeAfter(element);
+					precursor = tail;
+					tail = tail.getLink();
+					cursor = tail;
+				}
+			}
+			manyNodes++;
 		}catch(OutOfMemoryError e) {
 				throw new OutOfMemoryError("addAfter(): Not enough memory for creating new node.");	
 		}
-}
+	}
 
 	public void addBefore(double element) {
 		try{
-
+			if(isCurrent()){
+				cursor.setLink(new DoubleNode(cursor.getData(), cursor.getLink()));
+				cursor.setData(element);
+			}
+			else{
+				if(manyNodes==0){
+					head = new DoubleNode(element,null);
+					tail = head;
+					cursor = head;
+				}
+				else{
+					head = new DoubleNode(element,head);
+					cursor = head.getLink();
+					precursor = head;
+				}
+			}
+			manyNodes++;
 		} catch(OutOfMemoryError e) {
 				throw new OutOfMemoryError("addBefore(): Not enough memory for creating new node.");	
 		}
 	}
 	
 	public void addAll(DoubleLinkedSeq addend) {
-		if(false) {
+		if(addend == null) {
 			throw new NullPointerException("addAll(): input parameter is null");
 		} else {
 			try{
-
+				DoubleNode argcursor = addend.getHead();
+				while(argcursor!=null){
+					tail.addNodeAfter(argcursor.getData());
+					tail = tail.getLink();
+					argcursor=argcursor.getLink();
+					manyNodes++;
+				}
 			} catch(OutOfMemoryError e) {
 				throw new OutOfMemoryError("addAll(): Not enough memory for creating new list.");
 			}
@@ -40,8 +85,9 @@ public class DoubleLinkedSeq {
 	}
 	
 	public void advance() {
-		if(false) {
-
+		if(isCurrent()) {
+			precursor = cursor;
+			cursor = cursor.getLink();
 		} else {
 			throw new IllegalStateException("advance(): There are no current cursor.");
 		}
@@ -70,16 +116,12 @@ public class DoubleLinkedSeq {
 	}
 	
 	public double getCurrent() {
-		if(false) {
-
-		} else {
-			throw new IllegalStateException("getCurrent(): There is no current element.");
-		}
-		return -1;
+		if(isCurrent())	return cursor.getData();
+		else throw new IllegalStateException("getCurrent(): There is no current element.");
 	}
 	
 	public boolean isCurrent() {
-		return false;
+		return cursor!=null;
 	}
 	
 	public void removeCurrent() {
@@ -91,11 +133,11 @@ public class DoubleLinkedSeq {
 	}
 	
 	public int size() {
-		return -1;
+		return manyNodes;
 	}
 	
 	public void start() {
-		
+		if(head!=null) cursor = head;
 	}
 
 	public void removeNegative() {

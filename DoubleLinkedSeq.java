@@ -21,7 +21,8 @@ public class DoubleLinkedSeq implements Cloneable{
 			if(isCurrent()){
 				cursor.addNodeAfter(element);
 				advance();
-				tail = cursor;
+				setPrecursor();
+				setTail();
 			}
 			else{
 				if(manyNodes==0){
@@ -30,6 +31,7 @@ public class DoubleLinkedSeq implements Cloneable{
 					cursor = head;
 				}
 				else{
+					setTail();
 					tail.addNodeAfter(element);
 					precursor = tail;
 					tail = tail.getLink();
@@ -72,6 +74,7 @@ public class DoubleLinkedSeq implements Cloneable{
 		} else {
 			try{
 				DoubleNode argcursor = addend.getHead();
+				setTail();
 				while(argcursor!=null){
 					tail.addNodeAfter(argcursor.getData());
 					tail = tail.getLink();
@@ -110,16 +113,26 @@ public class DoubleLinkedSeq implements Cloneable{
 	}
 	
 	public static DoubleLinkedSeq concatenation(DoubleLinkedSeq s1, DoubleLinkedSeq s2) {
-		if(false) {
+		if(s1==null || s2==null) {
 			throw new IllegalArgumentException("concaternation(s1, s2): at least one arguments is null");
 		}
-		
 		try {
-		
+			DoubleLinkedSeq ret = new DoubleLinkedSeq();
+			DoubleNode cur1 = s1.getHead();
+			DoubleNode cur2 = s2.getHead();
+			while(cur1!=null){
+				ret.addAfter(cur1.getData());
+				cur1=cur1.getLink();
+			}
+			while(cur2!=null){
+				ret.addAfter(cur2.getData());
+				cur2=cur2.getLink();
+			}
+			ret.setCursor(null);
+			return ret;
 		} catch(OutOfMemoryError e) {
 			throw new OutOfMemoryError("concaternation(s1, s2): Not enough memory.");
 		}
-		return null;
 	}
 	
 	public double getCurrent() {
@@ -132,8 +145,32 @@ public class DoubleLinkedSeq implements Cloneable{
 	}
 	
 	public void removeCurrent() {
-		if(false) {
-
+		if(isCurrent()) {
+			if(manyNodes==1){
+				head=null;
+				tail=null;
+				cursor=null;
+				precursor=null;
+			}
+			else if(cursor == head){
+				head = head.getLink();
+				cursor = head;
+				precursor = null;
+			}
+			else if(cursor == tail){
+				setPrecursor();
+				precursor.setLink(null);
+				tail.setData(precursor.getData());
+				tail.setLink(null);
+				cursor = null;
+				setPrecursor();
+			}
+			else{
+				cursor = cursor.getLink();
+				setTail();
+				setPrecursor();
+			}
+			manyNodes--;
 		} else {
 			throw new IllegalStateException("removeCurrent(): There is no current element.");
 		}
@@ -209,4 +246,36 @@ public class DoubleLinkedSeq implements Cloneable{
 		return tail;
 	}
 	//////////////////////////////////////////////
+	
+	//This is the methods which declared additionally.
+	public void setHead(DoubleNode newhead){
+		head = newhead;
+	}
+	
+	public void setTail(DoubleNode newtail){
+		tail = newtail;
+	}
+	
+	public void setManyNodes(int num){
+		manyNodes = num;
+	}
+	
+	public void setCursor(DoubleNode cur){
+		cursor = cur;
+	}
+	
+	public void setPrecursor(){
+		if(cursor!=head){
+			DoubleNode temp = head;
+			while(temp.getLink()!=cursor) temp = temp.getLink();
+			precursor = temp;
+		}
+		else precursor = null;
+	}
+	
+	public void setTail(){
+		DoubleNode temp = head;
+		while(temp.getLink()!=null) temp = temp.getLink();
+		tail = temp;
+	}
 }

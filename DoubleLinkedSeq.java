@@ -211,11 +211,33 @@ public class DoubleLinkedSeq implements Cloneable{
 
 public void removeMostDuplicate() {
 		if(manyNodes>1){
-			
+			int most = 0;
+			int notunique = 0;
+			double crit = 0.0;
+			cursor = head;
+			precursor = null;
+			while(cursor!=null){
+				int duplnum = 0;
+				for(DoubleNode iter = cursor;iter!=null;iter=iter.getLink()) if(isEqual(iter.getData(),cursor.getData())) duplnum++;
+				if(most<duplnum){
+					most=duplnum;
+					crit=cursor.getData();
+				}
+				else if(most==duplnum) notunique=duplnum;
+				precursor = cursor;
+				cursor = cursor.getLink();
+			}
+			if(notunique<most){
+				cursor = head;
+				while(cursor != null){
+					if(!isEqual(crit,cursor.getData())) cursor = cursor.getLink(); 
+					else removeCurrent();
+				}
+			}
+			cursor = head;
 		}
-		else throw new IllegalStateException("Need at least 2 elements in DLS!");
-	}
-	
+			else throw new IllegalStateException("Need at least 2 elements in DLS!");
+}
 	
 	//Do not modify below methods.
 	private boolean isEqual(double a, double b) {

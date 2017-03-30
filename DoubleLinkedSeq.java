@@ -158,17 +158,17 @@ public class DoubleLinkedSeq implements Cloneable{
 				precursor = null;
 			}
 			else if(cursor == tail){
-				setPrecursor();
-				precursor.setLink(null);
-				tail.setData(precursor.getData());
-				tail.setLink(null);
-				cursor = null;
-				setPrecursor();
-			}
-			else{
-				cursor = cursor.getLink();
 				setTail();
 				setPrecursor();
+				precursor.setLink(null);
+				tail = precursor;
+				cursor = null;
+			}
+			else{
+				setTail();
+				setPrecursor();
+				cursor = cursor.getLink();
+				precursor.setLink(cursor);
 			}
 			manyNodes--;
 		} else {
@@ -185,11 +185,35 @@ public class DoubleLinkedSeq implements Cloneable{
 	}
 
 	public void removeNegative() {
-		
-	}
+		if(isCurrent()){
+			if(manyNodes>1){
+				cursor=head;
+				precursor = null;
+				while(cursor!=null){
+					if(cursor.getData()<0){
+						removeCurrent();
+					}
+					else{
+						precursor = cursor;
+						cursor = cursor.getLink();
+					}
+					if(manyNodes==0){
+						cursor = null;
+					}
+				}
+			cursor = head;
+			precursor = null;
+			}
+			else throw new IllegalStateException("We need at least 2 elements in DLS.");
+		}
+		else throw new IllegalStateException("There's no current element.");	
+}	
 
-	public void removeMostDuplicate() {
-		
+public void removeMostDuplicate() {
+		if(manyNodes>1){
+			
+		}
+		else throw new IllegalStateException("Need at least 2 elements in DLS!");
 	}
 	
 	

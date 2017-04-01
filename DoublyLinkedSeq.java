@@ -127,7 +127,7 @@ public class DoublyLinkedSeq<T> implements Cloneable{
 	}
 	public T getCurrent()
 	{
-		if(isCurrent()) return cursor.getData();
+		if(isCurrent()) return (T) cursor.getData();
 		else throw new IllegalStateException("There's no current element!");
 	}
 

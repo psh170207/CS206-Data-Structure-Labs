@@ -45,8 +45,9 @@ public class Node<T>
    //   2. For the final node of a list, the link part is null.
    //      Otherwise, the link part is a reference to the
    //      next node of the list.
-   private double data;
-   private Node<T> link;   
+   private T data;
+   private Node<T> link;
+   private Node<T> blink; // back link.
 
 
    /**
@@ -61,10 +62,11 @@ public class Node<T>
    * @postcondition
    *   This node contains the specified data and link to the next node.
    **/   
-   public Node<T>(double initialData, DoubleNode initialLink)
+   public Node(T initialData, Node<T> initialLink, Node<T> initialBlink)
    {
       data = initialData;
       link = initialLink;
+	  blink = initialBlink;
    }
 
 
@@ -82,7 +84,7 @@ public class Node<T>
    **/
    public void addNodeAfter(T item)   
    {
-      link = new Node<T>(item, link);
+      link = new Node<T>(item, link, this.blink);
    }          
    
    
@@ -108,6 +110,10 @@ public class Node<T>
       return link;                                               
    } 
     
+   public Node<T> getBlink()
+   {
+      return blink;
+   }
     
    /**
    * Copy a list.
@@ -121,7 +127,8 @@ public class Node<T>
    * @exception OutOfMemoryError
    *   Indicates that there is insufficient memory for the new list.   
    **/ 
-   public static Node<T> listCopy(Node<T> source)
+   @SuppressWarnings("unchecked")
+   public static <T> Node<T> listCopy(Node<T> source)
    {
       Node<T> copyHead;
       Node<T> copyTail;
@@ -131,7 +138,7 @@ public class Node<T>
          return null;
          
       // Make the first node for the newly created list.
-      copyHead = new Node<T>(source.data, null);
+      copyHead = new Node<T>(source.data, null, null);
       copyTail = copyHead;
       
       // Make the rest of the nodes for the newly created list.
@@ -141,7 +148,6 @@ public class Node<T>
          copyTail.addNodeAfter(source.data);
          copyTail = copyTail.link;
       }
- 
       // Return the head reference for the new list.
       return copyHead;
    }
@@ -160,18 +166,19 @@ public class Node<T>
    * @exception OutOfMemoryError
    *   Indicates that there is insufficient memory for the new list.   
    **/
-   public static Node<T>[ ] listCopyWithTail(Node<T> source)
+   @SuppressWarnings("unchecked")
+   public static <T> Object[] listCopyWithTail(Node<T> source)
    {
       Node<T> copyHead;
       Node<T> copyTail;
-      Node<T>[ ] answer = new Node<T>[2];
+      Object[] answer = new Object[2];
      
       // Handle the special case of the empty list.   
       if (source == null)
          return answer; // The answer has two null references .
       
       // Make the first node for the newly created list.
-      copyHead = new Node<T>(source.data, null);
+      copyHead = new Node<T>(source.data, null, null);
       copyTail = copyHead;
       
       // Make the rest of the nodes for the newly created list.
@@ -199,7 +206,8 @@ public class Node<T>
    * @note
    *   A wrong answer occurs for lists longer than Int.MAX_VALUE.     
    **/   
-   public static int listLength(Node<T> head)
+   @SuppressWarnings("unchecked")
+   public static <T> int listLength(Node<T> head)  // Tbew is non-static.
    {
       Node<T> cursor;
       int answer;
@@ -235,16 +243,17 @@ public class Node<T>
    * @exception OutOfMemoryError
    *   Indicates that there is insufficient memory for the new list.    
    **/   
-   public static Node<T>[ ] listPart(Node<T> start, Node<T> end)
+   @SuppressWarnings("unchecked")
+   public static <T> Object[] listPart(Node<T> start, Node<T> end)
    {
       Node<T> copyHead;
       Node<T> copyTail;
       Node<T> cursor;
-      Node<T>[ ] answer = new Node<T>[2];
+      Object[] answer = new Object[2];
       
       // Make the first node for the newly created list. Notice that this will
       // cause a NullPointerException if start is null.
-      copyHead = new Node<T>(start.data, null);
+      copyHead = new Node<T>(start.data, null, null);
       copyTail = copyHead;
       cursor = start;
       
@@ -283,7 +292,8 @@ public class Node<T>
    * @exception IllegalArgumentException
    *   Indicates that position is not positive.    
    **/   
-   public static Node<T> listPosition(Node<T> head, int position)
+   @SuppressWarnings("unchecked")
+   public static <T> Node<T> listPosition(Node<T> head, int position)
    {
       Node<T> cursor;
       int i;
@@ -311,7 +321,8 @@ public class Node<T>
    *   specified target. If there is no such node, the null reference is 
    *   returned.     
    **/   
-   public static Node<T> listSearch(Node<T> head, T target)
+   @SuppressWarnings("unchecked")
+   public static <T> Node<T> listSearch(Node<T> head, T target)
    {
       Node<T> cursor;
       
@@ -367,6 +378,11 @@ public class Node<T>
    public void setLink(Node<T> newLink)
    {                    
       link = newLink;
+   }
+   
+   public void setBlink(Node<T> newBlink)
+   {
+      blink = newBlink;
    }
 }
            

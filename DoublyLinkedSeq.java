@@ -85,7 +85,8 @@ public class DoublyLinkedSeq<T> implements Cloneable{
 		} else {
 			try{
 				Node argcursor = addend.getHead();
-				while(argcursor!=null){
+				Node argtail = addend.getTail();
+				while(argcursor!=argtail){
 					Node temp = new Node(argcursor.getData(),dummyTail,dummyTail.getPrv());
 					dummyTail.getPrv().setLink(temp);
 					dummyTail.setPrv(temp);
@@ -156,18 +157,35 @@ public class DoublyLinkedSeq<T> implements Cloneable{
 		}
 		try {
 			DoublyLinkedSeq<T> ret = new DoublyLinkedSeq<T>();
+			
 			Node cur1 = s1.getHead();
+			cur1 = cur1.getLink();
+			Node tail1 = s1.getTail();
+			
 			Node cur2 = s2.getHead();
-			while(cur1!=null){
-				ret.addAfter((T)cur1.getData());
+			cur2 = cur2.getLink();
+			Node tail2 = s2.getTail();
+			
+			Node cur = ret.getHead();
+			
+			while(cur1!=tail1){
+				Node temp = new Node(cur1.getData(),cur.getLink(),cur);
+				cur.getLink().setPrv(temp);
+				cur.setLink(temp);
 				cur1=cur1.getLink();
+				cur = cur.getLink();
 			}
-			while(cur2!=null){
-				ret.addAfter((T)cur2.getData());
+			while(cur2!=tail2){
+				Node temp = new Node(cur2.getData(),cur.getLink(),cur);
+				cur.getLink().setPrv(temp);
+				cur.setLink(temp);
 				cur2=cur2.getLink();
+				cur = cur.getLink();
 			}
 			ret.setCursor(null);
+			ret.setManyNodes(s1.size()+s2.size());
 			return ret;
+			
 		} catch(OutOfMemoryError e) {
 			throw new OutOfMemoryError("concaternation(s1, s2): Not enough memory.");
 		}
@@ -238,11 +256,18 @@ public class DoublyLinkedSeq<T> implements Cloneable{
 	{
 		if(dummyHead.getLink()!=null) cursor = dummyHead.getLink();
 	}
-	///////////////////////////////////////////////////////////////////////////////////////
+	
+	//////////////// self-declared part //////////////////////////////
 	public Node<T> getHead(){
 		return dummyHead;
 	}
 	public void setCursor(Node<T> node){
 		cursor = node;
+	}
+	public Node<T> getTail(){
+		return dummyTail;
+	}
+	public void setManyNodes(int num){
+		manyNodes = num;
 	}
 }

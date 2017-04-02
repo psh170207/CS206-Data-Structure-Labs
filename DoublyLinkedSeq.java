@@ -85,6 +85,7 @@ public class DoublyLinkedSeq<T> implements Cloneable{
 		} else {
 			try{
 				Node argcursor = addend.getHead();
+				argcursor = argcursor.getLink();
 				Node argtail = addend.getTail();
 				while(argcursor!=argtail){
 					Node temp = new Node(argcursor.getData(),dummyTail,dummyTail.getPrv());

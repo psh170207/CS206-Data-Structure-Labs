@@ -47,7 +47,7 @@ public class Node<T>
    //      next node of the list.
    private T data;
    private Node<T> link;
-   private Node<T> blink; // back link.
+   private Node<T> prv; // previous link.
 
 
    /**
@@ -62,11 +62,11 @@ public class Node<T>
    * @postcondition
    *   This node contains the specified data and link to the next node.
    **/   
-   public Node(T initialData, Node<T> initialLink, Node<T> initialBlink)
+   public Node(T initialData, Node<T> initialLink, Node<T> initialPrv)
    {
       data = initialData;
       link = initialLink;
-	  blink = initialBlink;
+	  prv = initialPrv;
    }
 
 
@@ -84,7 +84,7 @@ public class Node<T>
    **/
    public void addNodeAfter(T item)   
    {
-      link = new Node<T>(item, link, this.blink);
+      link = new Node<T>(item, link, this.prv);
    }          
    
    
@@ -110,9 +110,9 @@ public class Node<T>
       return link;                                               
    } 
     
-   public Node<T> getBlink()
+   public Node<T> getPrv()
    {
-      return blink;
+      return prv;
    }
     
    /**
@@ -131,22 +131,24 @@ public class Node<T>
    public static <T> Node<T> listCopy(Node<T> source)
    {
       Node<T> copyHead;
-      Node<T> copyTail;
       
       // Handle the special case of the empty list.
       if (source == null)
          return null;
          
       // Make the first node for the newly created list.
-      copyHead = new Node<T>(source.data, null, null);
-      copyTail = copyHead;
+	  copyHead = new Node<T>(null, null, null);
+      Node<T> firstElem = new Node<T>(source.getData(),null,copyHead);
+	  copyHead.setLink(firstElem);
+      
       
       // Make the rest of the nodes for the newly created list.
+	  Node<T> copycursor = firstElem;
       while (source.link != null)
       {
          source = source.link;
-         copyTail.addNodeAfter(source.data);
-         copyTail = copyTail.link;
+         Node<T> temp = new Node<T>(source.getData(),source.getLink(),copycursor);
+		 copycursor = temp;
       }
       // Return the head reference for the new list.
       return copyHead;
@@ -380,9 +382,8 @@ public class Node<T>
       link = newLink;
    }
    
-   public void setBlink(Node<T> newBlink)
+   public void setPrv(Node<T> newPrv)
    {
-      blink = newBlink;
+      prv = newPrv;
    }
 }
-           

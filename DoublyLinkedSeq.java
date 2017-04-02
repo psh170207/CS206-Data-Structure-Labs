@@ -12,8 +12,9 @@ public class DoublyLinkedSeq<T> implements Cloneable{
 	
 	public DoublyLinkedSeq() {
 		manyNodes=0;
-		dummyHead = new Node(null,dummyTail,null);
+		dummyHead = new Node(null,null,null);
 		dummyTail = new Node(null,null,dummyHead);
+		dummyHead.setLink(dummyTail);
 		head = dummyHead;
 		tail = dummyTail;
 		cursor = null;
@@ -24,19 +25,21 @@ public class DoublyLinkedSeq<T> implements Cloneable{
 		try{
 			if(isCurrent()){
 				Node temp = new Node(element,cursor.getLink(),cursor);
-				cursor.getLink().setBlink(temp);
+				cursor.getLink().setPrv(temp);
 				cursor.setLink(temp);
 				advanceForward();
 			}
 			else{
 				if(manyNodes==0){
 					Node temp = new Node(element,dummyTail,dummyHead);
+					dummyHead.setLink(temp);
+					dummyTail.setPrv(temp);
 					cursor = temp;
 				}
 				else{
-					Node temp = new Node(element,dummyTail,dummyTail.getBlink());
-					dummyTail.setBlink(temp);
-					dummyTail.getBlink().setLink(temp);
+					Node temp = new Node(element,dummyTail,dummyTail.getPrv());
+					dummyTail.getPrv().setLink(temp);
+					dummyTail.setPrv(temp);
 					cursor = temp;
 				}
 			}
@@ -50,19 +53,21 @@ public class DoublyLinkedSeq<T> implements Cloneable{
 	{
 		try{
 			if(isCurrent()){
-				Node temp = new Node(element, cursor, cursor.getBlink());
-				cursor.getBlink().setLink(temp);
-				cursor.setBlink(temp);
+				Node temp = new Node(element, cursor, cursor.getPrv());
+				cursor.getPrv().setLink(temp);
+				cursor.setPrv(temp);
 				advanceBackward();
 			}
 			else{
 				if(manyNodes==0){
 					Node temp = new Node(element,dummyTail,dummyHead);
+					dummyHead.setLink(temp);
+					dummyTail.setPrv(temp);
 					cursor = temp;
 				}
 				else{
 					Node temp = new Node(element, dummyHead.getLink(), dummyHead);
-					dummyHead.getLink().setBlink(temp);
+					dummyHead.getLink().setPrv(temp);
 					dummyHead.setLink(temp);
 					cursor = temp;
 				}
@@ -75,13 +80,29 @@ public class DoublyLinkedSeq<T> implements Cloneable{
 
 	public void addAll(DoublyLinkedSeq<T> addend)
 	{
-
+		if(addend == null) {
+			throw new NullPointerException("addAll(): input parameter is null");
+		} else {
+			try{
+				Node argcursor = addend.getHead();
+				while(argcursor!=null){
+					Node temp = new Node(argcursor.getData(),dummyTail,dummyTail.getPrv());
+					dummyTail.getPrv().setLink(temp);
+					dummyTail.setPrv(temp);
+					argcursor=argcursor.getLink();
+					manyNodes++;
+				}
+			} catch(OutOfMemoryError e) {
+				throw new OutOfMemoryError("addAll(): Not enough memory for creating new list.");
+			}
+		}
 	}
 
 	public void advanceForward()
 	{
 		if(isCurrent()){
-			cursor=cursor.getLink();
+			if(cursor.getLink()!=null) cursor=cursor.getLink();
+			else cursor = null;
 		}
 		else throw new IllegalStateException("There's no current element!");
 	}
@@ -89,7 +110,8 @@ public class DoublyLinkedSeq<T> implements Cloneable{
 	public void advanceBackward()
 	{
 		if(isCurrent()){
-			cursor=cursor.getBlink();
+			if(cursor.getPrv()!=null) cursor=cursor.getPrv();
+			else cursor = null;
 		}
 		else throw new IllegalStateException("There's no current element!");
 	}
@@ -97,16 +119,58 @@ public class DoublyLinkedSeq<T> implements Cloneable{
 
 	public void advanceNstepForward(int n)
 	{
-
+		if(isCurrent()){
+			boolean valid = true;
+			Node temp = cursor;
+			for(int i=0;i<n;i++){
+				if(temp.getLink()!=null) temp = temp.getLink();
+				else valid = false;
+			}
+			
+			if(valid) for(int i=0;i<n;i++) advanceForward();
+			else throw new IllegalStateException("There is no element at target position!");
+			}
+		else throw new IllegalStateException("There is no current element!");
 	}
+	
 	public void advanceNstepBackward(int n)
 	{
-
+		if(isCurrent()){
+			boolean valid = true;
+			Node temp = cursor;
+			for(int i=0;i<n;i++){
+				if(temp.getPrv()!=null) temp = temp.getPrv();
+				else valid = false;
+			}
+			
+			if(valid) for(int i=0;i<n;i++) advanceBackward();
+			else throw new IllegalStateException("There is no element at target position!");
+			}
+		else throw new IllegalStateException("There is no current element!");
 	}
 
 	public static <T> DoublyLinkedSeq<T> concatenation(DoublyLinkedSeq s1, DoublyLinkedSeq s2)
 	{
-		return null;
+		if(s1==null || s2==null) {
+			throw new IllegalArgumentException("concaternation(s1, s2): at least one arguments is null");
+		}
+		try {
+			DoublyLinkedSeq<T> ret = new DoublyLinkedSeq<T>();
+			Node cur1 = s1.getHead();
+			Node cur2 = s2.getHead();
+			while(cur1!=null){
+				ret.addAfter((T)cur1.getData());
+				cur1=cur1.getLink();
+			}
+			while(cur2!=null){
+				ret.addAfter((T)cur2.getData());
+				cur2=cur2.getLink();
+			}
+			ret.setCursor(null);
+			return ret;
+		} catch(OutOfMemoryError e) {
+			throw new OutOfMemoryError("concaternation(s1, s2): Not enough memory.");
+		}
 	}
 
 	public DoublyLinkedSeq<T> clone()
@@ -138,7 +202,31 @@ public class DoublyLinkedSeq<T> implements Cloneable{
 
 	public void removeCurrent()
 	{
-
+		if(isCurrent()) {
+			if(manyNodes==1){
+				dummyHead.setLink(dummyTail);
+				dummyTail.setPrv(dummyHead);
+				cursor = null;
+			}
+			else if(cursor == dummyHead.getLink()){
+				dummyHead.setLink(cursor.getLink());
+				cursor.getLink().setPrv(dummyHead);
+				cursor = dummyHead.getLink();
+			}
+			else if(cursor == dummyTail.getPrv()){
+				dummyTail.setPrv(cursor.getPrv());
+				cursor.getPrv().setLink(dummyTail);
+				cursor = dummyTail.getPrv();
+			}
+			else{
+				cursor.getLink().setPrv(cursor.getPrv());
+				cursor.getPrv().setLink(cursor.getLink());
+				cursor = cursor.getLink();
+			}
+			manyNodes--;
+		} else {
+			throw new IllegalStateException("removeCurrent(): There is no current element.");
+		}
 	}
 
 	public int size()
@@ -149,5 +237,12 @@ public class DoublyLinkedSeq<T> implements Cloneable{
 	public void start()
 	{
 		if(dummyHead.getLink()!=null) cursor = dummyHead.getLink();
+	}
+	///////////////////////////////////////////////////////////////////////////////////////
+	public Node<T> getHead(){
+		return dummyHead;
+	}
+	public void setCursor(Node<T> node){
+		cursor = node;
 	}
 }

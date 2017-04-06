@@ -12,33 +12,67 @@ public class StackCalculator {
 	public String changeToPostfix(String infixExpression) throws UnbalancedParenthesisException{
 		//Change input infix expression to postfix expression
 		if(isBalanced(infixExpression)){
-			LinkedStack<String> temp = new LinkedStack<String>();
+			LinkedStack<Character> temp = new LinkedStack<Character>();
 			String postfix= new String("");
-			char[] operator = {'+','-','*','/'};
-			char[] parenthesis = {'(',')','{','}','[',']'};
+			char prvc='0';
 			for (int i=0;i<infixExpression.length();i++){
 				char c = infixExpression.charAt(i);
+				if(i>1) prvc = infixExpression.charAt(i-2);
+				//System.out.println("i is "+i);
+				//System.out.println(c);
+				//System.out.println(prvc);
+				//System.out.println("------------------------------");
 				if(isOperator(c)){
-					if(isOperator(temp.peek())){
-						
+					if((c=='-')&&(isOperator(prvc))){
+						postfix+=c;//negative number.
 					}
-					temp.push(c);
+					else{
+						if(!temp.isEmpty()){
+							if(isOperator(temp.peek())){ // stack top is operator.
+								if(getPriority(c)>getPriority(temp.peek())) temp.push(c); // c has higher priority than stack top.
+								else{ // c has lower or equal priority than stack top.
+									postfix+=temp.pop();
+									if(!temp.isEmpty()){
+										if(isOperator(temp.peek())){
+											if(getPriority(c)>getPriority(temp.peek())) temp.push(c);
+											else{
+												postfix+=' '; //consecutive pop, add blank space.
+												postfix+=temp.pop();
+												temp.push(c);
+											}
+										}// stack top is operator, pop again. Because there's no 2 operators which has same priority.
+										else temp.push(c);
+									}
+									else temp.push(c);
+								}
+							}
+							else temp.push(c);
+						}
+						else temp.push(c); // stack top is not operator.
+					}
 				}
 				else if(isLeftParenthesis(c)){
-					temp.push(c)
+					temp.push(c);
 				}
 				else if(isRightParenthesis(c)){
-					char op;
-					switch(c){
-						case ')':
-							while(temp.peek()!='('){
-								op=temp.pop();
-								postfix+=op;
-							}
+					if(isOperator(temp.peek())){
+						postfix+=temp.pop();// pop the operator.
+						temp.pop();// pop the leftparenthesis.
 					}
 				}
+				else{ // c should be operand.
+					postfix+=c;
+				}
 			}
-			System.out.println((postfix+"31234").charAt(1));
+			
+			while(!temp.isEmpty()){//다 돌고나면 마지막에 스택에 남은 연산자가 pop이 안됨.
+				if(isOperator(temp.peek())){
+					postfix+=' ';
+					postfix+=temp.pop();
+				} // if the stack top is operator, pop and add to postfix.
+				if(!temp.isEmpty()) temp.pop(); // if the stack top is not an operator, just pop.
+			}
+			
 			return postfix;
 		}
 		else throw new UnbalancedParenthesisException("This expression is unbalanced!!");
@@ -83,7 +117,50 @@ public class StackCalculator {
 
 	
 	public int getPriority(char operator){
-		if(operator == '/' || operator == '*') return 1;
-		else return 2;
+		if(operator == '/' || operator == '*') return 2;
+		else return 1;
+	}
+	
+	public boolean isOperator(char c){
+		boolean isOp = false;
+		char[] operator = {'+','–','*','/'};
+		for (char op : operator){
+			if(c==op) isOp=true;
+		}
+		return isOp;
+	}
+	
+	public boolean isLeftParenthesis(char c){
+		boolean isLP = false;
+		char[] leftparenthesis = {'(','{','['};
+		for (char lp : leftparenthesis){
+			if(c==lp) isLP = true;
+		}
+		return isLP;
+	}
+	public boolean isRightParenthesis(char c){
+		boolean isRP = false;
+		char[] rightparenthesis = {')','}',']'};
+		for (char rp : rightparenthesis){
+			if(c==rp) isRP = true;
+		}
+		return isRP;
+	}
+	public boolean isZeroDivision(String postfix){
+		boolean zerodiv = false;
+		for(int i=0;i<postfix.length();i++){
+			char c = postfix.charAt(i);
+			char prvc = 'n';
+			char preprvc = 'n';
+			if(i>2){
+				prvc = postfix.charAt(i-2);
+				preprvc = postfix.charAt(i-3);
+			}
+			
+			if(c=='/'){
+				if(prvc=='0' && preprvc==' ') zerodiv = true;
+			}
+		}
+		return zerodiv;
 	}
 }

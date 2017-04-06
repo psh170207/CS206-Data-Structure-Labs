@@ -18,7 +18,25 @@ public class StackCalculator {
 			char[] parenthesis = {'(',')','{','}','[',']'};
 			for (int i=0;i<infixExpression.length();i++){
 				char c = infixExpression.charAt(i);
-
+				if(isOperator(c)){
+					if(isOperator(temp.peek())){
+						
+					}
+					temp.push(c);
+				}
+				else if(isLeftParenthesis(c)){
+					temp.push(c)
+				}
+				else if(isRightParenthesis(c)){
+					char op;
+					switch(c){
+						case ')':
+							while(temp.peek()!='('){
+								op=temp.pop();
+								postfix+=op;
+							}
+					}
+				}
 			}
 			System.out.println((postfix+"31234").charAt(1));
 			return postfix;
@@ -61,5 +79,11 @@ public class StackCalculator {
 			}
 		}
 	return temp.isEmpty() && vaild;
+	}
+
+	
+	public int getPriority(char operator){
+		if(operator == '/' || operator == '*') return 1;
+		else return 2;
 	}
 }

@@ -15,72 +15,121 @@ public class StackCalculator {
 			LinkedStack<Character> temp = new LinkedStack<Character>();
 			String postfix= new String("");
 			char prvc='0';
-			for (int i=0;i<infixExpression.length();i++){
-				char c = infixExpression.charAt(i);
-				if(i>1) prvc = infixExpression.charAt(i-2);
-				//System.out.println("i is "+i);
-				//System.out.println(c);
-				//System.out.println(prvc);
-				//System.out.println("------------------------------");
-				if(isOperator(c)){
-					if((c=='-')&&(isOperator(prvc))){
-						postfix+=c;//negative number.
-					}
-					else{
-						if(!temp.isEmpty()){
-							if(isOperator(temp.peek())){ // stack top is operator.
-								if(getPriority(c)>getPriority(temp.peek())) temp.push(c); // c has higher priority than stack top.
-								else{ // c has lower or equal priority than stack top.
-									postfix+=temp.pop();
-									if(!temp.isEmpty()){
-										if(isOperator(temp.peek())){
-											if(getPriority(c)>getPriority(temp.peek())) temp.push(c);
-											else{
-												postfix+=' '; //consecutive pop, add blank space.
-												postfix+=temp.pop();
-												temp.push(c);
-											}
-										}// stack top is operator, pop again. Because there's no 2 operators which has same priority.
-										else temp.push(c);
-									}
-									else temp.push(c);
-								}
-							}
-							else temp.push(c);
+			//infixExpression=modifyInfix(infixExpression);
+			
+			if(infixExpression.length()==0) return infixExpression;
+			else{
+				for (int i=0;i<infixExpression.length();i++){
+					char c = infixExpression.charAt(i);
+
+					if(i>1) prvc = infixExpression.charAt(i-2);
+
+					if(isOperator(c)){
+						if(c=='-' && i==0) postfix+=c;//first position.
+						else if(c=='-' && (isOperator(prvc) || isLeftParenthesis(prvc))){ // after operator or after leftparenthesis.
+							postfix+=c;//negative number.
 						}
-						else temp.push(c); // stack top is not operator.
+						else{
+							while(!(temp.isEmpty()||getPriority(temp.peek())<getPriority(c)||temp.peek()=='('||temp.peek()=='{'||temp.peek()=='[')){
+							postfix+=temp.pop();
+							postfix+=" ";//HERE.
+							}
+							temp.push(c);
+						}
+					}
+					else if(isLeftParenthesis(c)){
+						temp.push(c);
+					}
+					else if(isRightParenthesis(c)){
+						switch(c){
+							case ')':
+								while(temp.peek()!='('){
+									postfix+=temp.peek();
+									postfix+=' ';
+									temp.pop();
+								}
+								temp.pop();
+								break;
+							case '}':
+								while(temp.peek()!='{'){
+									postfix+=temp.peek();
+									postfix+=' ';
+									temp.pop();
+								}
+								temp.pop();
+								break;
+							case ']':
+								while(temp.peek()!='['){
+									postfix+=temp.peek();
+									postfix+=' ';
+									temp.pop();
+								}
+								temp.pop();
+								break;
+						}
+					}
+					else{ // c should be operand.
+						postfix+=c;
+						System.out.println(postfix+"e");
 					}
 				}
-				else if(isLeftParenthesis(c)){
-					temp.push(c);
-				}
-				else if(isRightParenthesis(c)){
+				
+				while(!temp.isEmpty()){//다 돌고나면 마지막에 스택에 남은 연산자가 pop이 안됨.
 					if(isOperator(temp.peek())){
-						postfix+=temp.pop();// pop the operator.
-						temp.pop();// pop the leftparenthesis.
-					}
+						postfix+=' ';
+						System.out.println(postfix+"f");
+						postfix+=temp.pop();
+						System.out.println(postfix+"g");
+					} // if the stack top is operator, pop and add to postfix.
+					//if(!temp.isEmpty()) temp.pop(); // if the stack top is not an operator, just pop.
 				}
-				else{ // c should be operand.
-					postfix+=c;
-				}
+				
+				postfix=postfix.replaceAll("\\s+", " ");
+				return postfix.trim();
 			}
-			
-			while(!temp.isEmpty()){//다 돌고나면 마지막에 스택에 남은 연산자가 pop이 안됨.
-				if(isOperator(temp.peek())){
-					postfix+=' ';
-					postfix+=temp.pop();
-				} // if the stack top is operator, pop and add to postfix.
-				if(!temp.isEmpty()) temp.pop(); // if the stack top is not an operator, just pop.
-			}
-			
-			return postfix;
 		}
 		else throw new UnbalancedParenthesisException("This expression is unbalanced!!");
 	}
 	
 	public double evaluate(String postfixExpression) throws DividedByZeroException{
 		//do evaluation and return the result
-		return 0.0;
+		LinkedStack<String> temp = new LinkedStack<String>();
+		String[] arr = postfixExpression.split(" ");
+		
+		for(int i=0;i<arr.length;i++){
+			System.out.print("arr[i] : "+arr[i]+"///");
+			if(!temp.isEmpty()) System.out.print("stack top : "+temp.peek()+"///");
+			if(isOperator_str(arr[i])){
+				double right = Double.parseDouble(temp.pop());
+				double left = Double.parseDouble(temp.pop());
+				if(arr[i].equals("+")){
+						double result = right+left;
+						System.out.println("addtion : "+result);
+						temp.push(""+result);
+				}
+				else if(arr[i].equals("-")){
+						double result = left-right;
+						System.out.println("sub : "+result);
+						temp.push(""+result);
+				}
+				else if(arr[i].equals("*")){
+						double result = left*right;
+						System.out.println("mult : "+result);
+						temp.push(""+result);
+				}
+				else if(arr[i].equals("/")){
+						double result = left/right;
+						System.out.println("div : "+result);
+						if(right==0) throw new DividedByZeroException("There's zero division!!");
+						else temp.push(""+result);
+				}
+			}
+			else{
+				temp.push(arr[i]);
+			}
+		}
+		double ret = Double.parseDouble(temp.pop());
+		return ret;
 	}
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	public static boolean isBalanced(String expression){
@@ -123,7 +172,7 @@ public class StackCalculator {
 	
 	public boolean isOperator(char c){
 		boolean isOp = false;
-		char[] operator = {'+','–','*','/'};
+		char[] operator = {'+','-','*','/'};
 		for (char op : operator){
 			if(c==op) isOp=true;
 		}
@@ -146,21 +195,32 @@ public class StackCalculator {
 		}
 		return isRP;
 	}
-	public boolean isZeroDivision(String postfix){
-		boolean zerodiv = false;
-		for(int i=0;i<postfix.length();i++){
-			char c = postfix.charAt(i);
-			char prvc = 'n';
-			char preprvc = 'n';
-			if(i>2){
-				prvc = postfix.charAt(i-2);
-				preprvc = postfix.charAt(i-3);
+	
+	public boolean isOperator_str(String s){
+		boolean isOp = false;
+		String[] operator = {"+","-","*","/"};
+		for(String op : operator){
+			if(s.equals(op)) isOp = true;
+		}
+		return isOp;
+	}
+	public String modifyInfix(String s){
+		String[] arr = s.split(" ");
+		String temp ="";
+		for(int i=0;i<arr.length;i++){
+			if(isOperator_str(arr[i])){
+				temp+=(arr[i]+" ");
 			}
-			
-			if(c=='/'){
-				if(prvc=='0' && preprvc==' ') zerodiv = true;
+			else{
+				if(arr[i].charAt(0)=='-'){
+					int len = arr[i].length();
+					temp+="( 0 - "+arr[i].substring(1,len)+" ) ";
+				}
+				else temp+=arr[i]+" ";
 			}
 		}
-		return zerodiv;
+		int len_temp = temp.length();
+		return temp.substring(0,len_temp-1);
 	}
+	
 }

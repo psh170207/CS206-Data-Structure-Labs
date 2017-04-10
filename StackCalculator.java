@@ -70,16 +70,13 @@ public class StackCalculator {
 					}
 					else{ // c should be operand.
 						postfix+=c;
-						System.out.println(postfix+"e");
 					}
 				}
 				
 				while(!temp.isEmpty()){//다 돌고나면 마지막에 스택에 남은 연산자가 pop이 안됨.
 					if(isOperator(temp.peek())){
 						postfix+=' ';
-						System.out.println(postfix+"f");
 						postfix+=temp.pop();
-						System.out.println(postfix+"g");
 					} // if the stack top is operator, pop and add to postfix.
 					//if(!temp.isEmpty()) temp.pop(); // if the stack top is not an operator, just pop.
 				}
@@ -95,38 +92,29 @@ public class StackCalculator {
 		//do evaluation and return the result
 		LinkedStack<String> temp = new LinkedStack<String>();
 		String[] arr = postfixExpression.split(" ");
-		
 		for(int i=0;i<arr.length;i++){
-			System.out.print("arr[i] : "+arr[i]+"///");
-			if(!temp.isEmpty()) System.out.print("stack top : "+temp.peek()+"///");
 			if(isOperator_str(arr[i])){
 				double right = Double.parseDouble(temp.pop());
 				double left = Double.parseDouble(temp.pop());
 				if(arr[i].equals("+")){
 						double result = right+left;
-						System.out.println("addtion : "+result);
 						temp.push(""+result);
 				}
 				else if(arr[i].equals("-")){
 						double result = left-right;
-						System.out.println("sub : "+result);
 						temp.push(""+result);
 				}
 				else if(arr[i].equals("*")){
 						double result = left*right;
-						System.out.println("mult : "+result);
 						temp.push(""+result);
 				}
 				else if(arr[i].equals("/")){
 						double result = left/right;
-						System.out.println("div : "+result);
 						if(right==0) throw new DividedByZeroException("There's zero division!!");
 						else temp.push(""+result);
 				}
 			}
-			else{
-				temp.push(arr[i]);
-			}
+			else temp.push(arr[i]);
 		}
 		double ret = Double.parseDouble(temp.pop());
 		return ret;
@@ -204,6 +192,7 @@ public class StackCalculator {
 		}
 		return isOp;
 	}
+	/*
 	public String modifyInfix(String s){
 		String[] arr = s.split(" ");
 		String temp ="";
@@ -222,5 +211,5 @@ public class StackCalculator {
 		int len_temp = temp.length();
 		return temp.substring(0,len_temp-1);
 	}
-	
+	*/
 }

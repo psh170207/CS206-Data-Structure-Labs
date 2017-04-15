@@ -21,75 +21,83 @@ public class Deque<E> extends ArrayQueue<E>{
 	  public void addFirst(E element)
 	  {
 		if(manyItems==data.length){
-			if(manyItems*2+1>Integer.MAX_VALUE) throw new IllegalStateException("There's arithmetic overflow!");
-			else ensureCapacityWithBlank();
+			ensureCapacityWithBlank(manyItems*2+1);
+			data[front-1] = element;
 		}
 		if(manyItems==0){
 			front = 0;
 			rear = 0;
 			data[front] = element;
 		}
-		else data[front-1] = element;
+		else{ //manyItems < data.length
+			if(front<=rear){
+				if(front!=0){
+					front--;
+					data[front] = element;
+				}
+				else{// front == 0.
+					E[] tmp = (E[]) new Object[data.length];
+					System.arraycopy(data,front,tmp,1,manyItems);
+					front = 0;
+					rear = manyItems;
+					data = tmp;
+					data[front] = element;
+				}
+			}
+			else{ // front > rear.
+				front--;
+				data[front] = element;
+			}
+		}
 		manyItems++;
 	  }
 	  
 	  
 	  public void addLast(E element)
 	  {
-		if(manyItems==data.length) ensureCapacity();
+		if(manyItems==data.length) ensureCapacity(manyItems*2+1);
 		if(manyItems==0){
 			front=0;
 			rear=0;
 		}
 		else rear = nextIndex(rear);
 		data[rear] = element;
-		manyItems;
+		manyItems++;
 	  }
 	  
 	  
 	  public E removeFirst()
 	  {
-		  return tmp;
+	  	E answer;
+		if(manyItems == 0) throw new NoSuchElementException("There's no element!");
+		answer = data[front];
+		front = nextIndex(front);
+		manyItems--;
+		return answer;
 	  }
 	  
 	  
 	  public E removeLast()
 	  {
-		  return tmp;
+		E answer;
+		if(manyItems==0) throw new NoSuchElementException("There's no element!");
+		answer = data[rear];
+		rear = prvIndex(rear);
+		manyItems--;
+		return answer;
 	  }
 	  
 	  //helper methods.
-	  private int nextIndex(int i){
-	  	if(i==data.length-1) return 0;
-		else return i+1;
+	  private int prvIndex(int i){
+	  	if(i==0) return data.length-1;
+		else return i-1;
 	  }
 	  
 	  private void ensureCapacityWithBlank(int minimumCapacity){
 	  	Object[] biggerArray;
 		int n1,n2;
 		
-		if(data.length >= minimumCapacity){
-			if(front<=rear){
-				if(front!=0) return;
-				else{ // front == 0.
-					biggerArray = new Object[data.length+1];
-					System.arraycopy(data,0,biggerArray,1,manyItems); // biggerArray[0] = blank.
-					front = 1;
-					rear = manyItems;
-					data = (E[]) biggerArray;
-				}
-			}
-			else{//front > rear.
-				biggerArray = new Object[data.length+1];
-				n1 = data.length - front;
-				n2 = rear+1;
-				System.arraycopy(data,front,biggerArray,1,n1); // biggerArray[0] = blank.
-				System.arraycopy(data,0,biggerArray,n1+1,n2);
-				front = 1;
-				rear = manyItems;
-				data = (E[]) biggerArray;
-			}
-		}
+		if(data.length >= minimumCapacity) return;
 		else if(manyItems==0){
 			data = (E[]) new Object[minimumCapacity];
 		}
@@ -113,11 +121,9 @@ public class Deque<E> extends ArrayQueue<E>{
 			n2 = rear +1;
 			System.arraycopy(data,front,biggerArray,1,n1); // make blank in biggerArray[0] so that addFirst().
 			System.arraycopy(data,0,biggerArray,n1+1,n2);
-			front = 0;
-			rear = manyItems-1;
+			front = 1;
+			rear = manyItems;
 			data = (E[]) biggerArray;
 		}
 	  }
-
-
 }

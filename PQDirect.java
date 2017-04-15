@@ -23,7 +23,6 @@ public class PQDirect<E>
 
 	public void add(E item, int priority)
 	{
-		//if(item==null) throw new IllegalArgumentException("Item is null!");
 		if(priority<0 || priority>highest) throw new IllegalArgumentException("Priority must be larger or equal than 0!");
 		try{
 			Node tmp = new Node(priority, item, tail, tail.getPrvlink());
@@ -59,6 +58,7 @@ public class PQDirect<E>
 		}
 		return (E) answer.getData();
 	}
+	
 	//helper method.
 	private int FindPriority()
 	{

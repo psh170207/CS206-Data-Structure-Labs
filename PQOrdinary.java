@@ -15,11 +15,10 @@ public class PQOrdinary<E>
 	public PQOrdinary(int highest)
 	{
 		if(highest<0) throw new IllegalArgumentException("The highest priority must be larger or equal than 0!");
-		Object[] temp = new Object[highest+1];
+		queues=new ArrayQueue[highest+1];
 		for(int i=0;i<=highest;i++){
-			temp[i] = (E) temp[i];
+			queues[i]=new ArrayQueue<E>();
 		}
-		queues = (ArrayQueue<E>[]) temp;
 	}
 
 	public void add(E item, int priority)

@@ -208,56 +208,73 @@ public class IntTreeBag implements Cloneable
       // Student will replace this return statement with their own code:
 	  IntBTNode cursor = getRoot();
 	  IntBTNode parentOfCursor = cursor;
+	  IntBTNode target_Node = null;
 	  boolean ret = true;
 	  
-	  if(cursor == null) return false;
-	  
-	  if(cursor.getData()==target){
-	  	if(cursor.getLeft()==null){
+	  /* if target is root */
+	  if(root.getData()==target){
+	  	if(root.getLeft()==null){
 			root = root.getRight();
 			return true;
 		}
-		else if(cursor.getRight()==null){
+		else if(root.getRight()==null){
 			root = root.getLeft();
+			return true;
+		}
+		else{
+			cursor.setData(cursor.getLeft().getRightmostData());
+			cursor.setLeft(cursor.getLeft().removeRightmost());
 			return true;
 		}
 	  }
 	  
+	  /* find target */
 	  while(cursor!=null){
-		if(cursor.getData()==target){
-			if(cursor == parentOfCursor.getLeft()){
-				if(cursor.getLeft()==null)
-					parentOfCursor.setLeft(cursor.getRight());
-				else if(cursor.getRight()==null)
-					parentOfCursor.setLeft(cursor.getLeft());
-				else{
-					cursor.setData(cursor.getLeft().getRightmostData());
-					cursor.setLeft(cursor.getLeft().removeRightmost());
-				}
-			}
-			else{
-				if(cursor.getRight()==null)
-					parentOfCursor.setRight(cursor.getLeft());
-				else if(cursor.getLeft()==null)
-					parentOfCursor.setRight(cursor.getRight());
-				else{
-					cursor.setData(cursor.getLeft().getRightmostData());
-					cursor.setLeft(cursor.getLeft().removeRightmost());
-				}
-			}
+	  	if(cursor.getData() == target){
+			break;
 		}
 		else if(cursor.getData()<target){
 			parentOfCursor = cursor;
-			cursor=cursor.getRight();
-			if(cursor==null) ret = false;
+			cursor = cursor.getRight();
 		}
 		else{
 			parentOfCursor = cursor;
 			cursor = cursor.getLeft();
-			if(cursor==null) ret = false;
 		}
 	  }
-	  return ret;
+	  
+	  /* modify tree, cursor is target node */
+	  if(cursor==null) return false;
+	  else{
+	  	/* if cursor has no left child */
+	  	if(cursor.getLeft()==null){
+			if(cursor == parentOfCursor.getLeft()){
+				parentOfCursor.setLeft(cursor.getRight());
+				return true;
+			}
+			else{
+				parentOfCursor.setRight(cursor.getRight());
+				return true;
+			}
+		}
+		/* if cursor has no right child */
+		else if(cursor.getRight()==null){
+			if(cursor == parentOfCursor.getLeft()){
+				parentOfCursor.setLeft(cursor.getLeft());
+				return true;
+			}
+			else{
+				parentOfCursor.setRight(cursor.getLeft());
+				return true;
+			}
+		}
+		/* if cursor has both child */
+		else{
+			cursor.setData(cursor.getLeft().getRightmostData());
+			cursor.setLeft(cursor.getLeft().removeRightmost());
+			return true;
+		}
+	  }
    }
      
    /**

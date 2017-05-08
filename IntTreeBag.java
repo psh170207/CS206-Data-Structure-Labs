@@ -299,7 +299,22 @@ public class IntTreeBag implements Cloneable
    **/
    public int search(int target)
    {
-      return -1;
+		IntBTNode cursor = root;
+		int level = -1;
+		while(cursor != null){
+			if(cursor.getData()==target){
+				return level+1;
+			}
+			else if(cursor.getData()<target){
+				cursor = cursor.getRight();
+				level++;
+			}
+			else{
+				cursor = cursor.getLeft();
+				level++;
+			}
+		}
+		return level;
    }
 
 
@@ -320,7 +335,14 @@ public class IntTreeBag implements Cloneable
    public static IntTreeBag union(IntTreeBag b1, IntTreeBag b2)
    {
       // Student will replace this return statement with their own code:
-      return null;
+      IntTreeBag answer = new IntTreeBag();
+	  
+	  if(b1!=null && b2!=null){
+	  	answer.root = IntBTNode.treeCopy(b1.getRoot());
+	  	answer.addTree(b2.getRoot());
+		return answer;
+	  }
+	  else throw new IllegalArgumentException("b1 or b2 is null!");
    }
 
 
@@ -340,7 +362,7 @@ public class IntTreeBag implements Cloneable
    **/   
    public static IntTreeBag[] split(IntTreeBag bag, int target)
    {
-      return null;
+   	
    }
 
    /**

@@ -8,6 +8,8 @@
 package elice;
 
 import java.util.Iterator;
+import java.util.Queue;
+import java.util.LinkedList;
 
 /******************************************************************************
 * This class is a homework assignment;
@@ -362,9 +364,61 @@ public class IntTreeBag implements Cloneable
    **/   
    public static IntTreeBag[] split(IntTreeBag bag, int target)
    {
-   	
+   
+   	IntTreeBag[] answer = new IntTreeBag[2];
+	IntTreeBag bag1 = new IntTreeBag();
+	IntTreeBag bag2 = new IntTreeBag();
+	IntTreeBag copy = new IntTreeBag(); // copied tree
+	IntBTNode cursor = bag.root;
+	
+   	copy.root = IntBTNode.treeCopy(bag.root); // copying tree
+	
+	if(bag!=null){
+		/* find target */
+		while(cursor!=null){
+			if(cursor.getData() == target){
+				break;
+			}
+			else if(cursor.getData()<target){
+				cursor = cursor.getRight();
+			}
+			else{
+				cursor = cursor.getLeft();
+			}
+	  	}
+		
+		bag2.root = new IntBTNode(target,null,null); // set the root of bag2 to target
+		copy.remove(target); // remove bag2's root
+		int[] data = copy.TreetoArray(); // data is a list of elements
+		
+		for(int i=0 ; i<data.length;i++){
+			if(data[i]>=target){
+				bag2.add(data[i]);
+			}
+			else{
+				bag1.add(data[i]);
+			}
+		}
+		
+		answer[0] = bag1;
+		answer[1] = bag2;
+		return answer;
+	}
+	
+	else throw new IllegalArgumentException("bag is null!");
    }
-
+   
+	private int[] TreetoArray(){
+		String list = root.inorderPrint();
+		list=list.trim();
+		int[] array = new int[size()];
+		String[] listarray = list.split("\\s");
+		
+		for(int i=0;i<listarray.length;i++){
+			array[i] = Integer.parseInt(listarray[i]);
+		}
+		return array;
+	}
    /**
     * A histogram is a graphical representation of the distribution of numerical data. 
     * getHistogram method return the array of the number of cases in each bin
@@ -381,34 +435,103 @@ public class IntTreeBag implements Cloneable
 
    public int[] getHistogram(int bin){
 	   int[] array = null;
-	   return array;
+	   IntTreeBag bag = new IntTreeBag();
+	   bag.root = IntBTNode.treeCopy(root);
+	   
+	   if(bin<=0) throw new IllegalArgumentException("bin is equal or smaller than zero.");
+	   
+	   /*determine the size of array*/
+	   else{
+	   	int largest = root.getRightmostData();
+		int smallest = root.getLeftmostData();
+		int sizeofbin = (largest-smallest)/bin + 1;
+	   	array = new int[sizeofbin];
+		
+		int[] data = bag.TreetoArray();
+		
+		for(int i=0;i<data.length;i++){
+			array[(data[i]-smallest)/bin]++;
+		}
+	   	return array;
+	   }
    }
-
+   
 	/*
 	 * LevelOrderIterator is an external iterator for IntTreeBag which can traverse IntTreeBag in level order (Breadth First Traversal).
 	 * You should implement hasNext() and next() methods in this class 
 	 */
 	private	class LevelOrderIterator implements Iterator<Integer> {
-
+		
+		IntBTNode node = root;
+		
+		int[] data = BFS(root);
+		int i=0;
+		
 		@Override
 		public boolean hasNext() {
-			// TODO Auto-generated method stub
-			return false;
+			return i<size();
 		}
 
 		@Override
 		public Integer next() {
-			// TODO Auto-generated method stub
-			return null;
+			Integer answer;
+			
+			if(!hasNext()){
+				throw new IllegalStateException("The Iterator is empty.");
+			}
+			
+			answer = data[i];
+			i++;
+			
+			return answer;
 		}
 		
 		@Override 
 		public void remove(){
-			
+			throw new UnsupportedOperationException("Iterator has no remove method.");
 		}
-		
 	}
 	
+	private static int[] BFS(IntBTNode root){
+		
+		String list = levelorderPrint(root);
+		list=list.trim();
+		
+		int[] array = new int[IntBTNode.treeSize(root)];
+		String[] listarray = list.split("\\s");
+		
+		for(int i=0;i<listarray.length;i++){
+			array[i] = Integer.parseInt(listarray[i]);
+		}
+		
+		return array;
+	}
+	
+    private static String levelorderPrint(IntBTNode root) {
+		   String ret = "";
+           // Declare a Queue. Here we traverse in Breadth First Search
+           Queue<IntBTNode> queue = new LinkedList<IntBTNode>();
+           if (root == null)
+                  return ret;
+           // Add root so we can further process the children.
+           queue.add(root);
+           // Run loop till queue is not empty
+           while (!queue.isEmpty()) {
+                  // remove the current root
+                  root = queue.poll();
+                  ret += root.getData() + " ";
+                  // left child exists insert in queue
+                  if (root.getLeft() != null) {
+                        queue.add(root.getLeft());
+                  }
+                  // left child exists insert in queue
+                  if (root.getRight() != null) {
+                        queue.add(root.getRight());
+                  }
+           }
+		   return ret;
+    }
+
 //DO NOT MODIFY BELOW METHOD
 	public Iterator<Integer> getLevelOrderIterator(){
 		return new LevelOrderIterator();

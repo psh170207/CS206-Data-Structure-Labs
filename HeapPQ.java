@@ -21,19 +21,37 @@ public class HeapPQ<E>
 	
 	public void add(E element, int priority)
     {
-        // A student must implement this method.
+		if(size==manyItems){
+			ensureCapacity(2*size);
+		} // if there's no available space, expend capacity
+		
 		int index = manyItems;
 		data[index] = element;
 		priorities[index] = priority;
 		entered[index] = manyItems;
+		// since, heap is a complete binary tree, every new element add at end of entry
 		
 		reheapification_up(index);
 		manyItems++;
     }
+	
+	private void ensureCapacity(int new_size){
+		int[] new_priorities = new int[new_size];
+		E[] new_data = (E[]) new Object[new_size];
+		int[] new_entered = new int[new_size];
+		
+		System.arraycopy(priorities,0,new_priorities,0,manyItems);
+		System.arraycopy(data,0,new_data,0,manyItems);
+		System.arraycopy(entered,0,new_entered,0,manyItems);
+		
+		priorities = new_priorities;
+		data = new_data;
+		entered = new_entered;
+	}
 
 	private void reheapification_up(int index)
 	{
-		while(priorities[index]>priorities[(index-1)/2])
+		while(priorities[index]>priorities[(index-1)/2]) // while child's priority > parent's prioirity
 		{
 			swap(index,(index-1)/2);
 			index = (index-1)/2; //update index
@@ -97,14 +115,14 @@ public class HeapPQ<E>
 	{
 		boolean hasLChild = false;
 		
-		while(priorities[index]<priorities[leftchild(index)] || priorities[index]<priorities[rightchild(index)])
+		while(priorities[index]<priorities[leftchild(index)] || priorities[index]<priorities[rightchild(index)]) // while parent's priority < children's priority
 		{
 			if(priorities[leftchild(index)]>priorities[rightchild(index)]) // swap with larger one
 			{
 				swap(index,leftchild(index));
 				index = leftchild(index); //update index
 			}
-			else if(priorities[leftchild(index)]<priorities[rightchild(index)])
+			else
 			{
 				swap(index,rightchild(index));
 				index = rightchild(index); //update index

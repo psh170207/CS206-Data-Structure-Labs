@@ -51,10 +51,11 @@ public class IntBalancedSet implements Cloneable
 		System.arraycopy(subset,0,child.subset,0,childCount);
 		child.dataCount = dataCount;
 		child.childCount = childCount;
+		
 		//new root's info
+		subset[0] = child;
 		dataCount = 0;
 		childCount = 1;
-		subset[0] = child;
 		fixExcess(0);
 	  }
    }
@@ -116,14 +117,22 @@ public class IntBalancedSet implements Cloneable
    public boolean remove(int target)
    {
       // Student will replace this return statement with their own code:
-      boolean answer = looseRemove(target);
+      /*boolean answer = looseRemove(target);
 	  if(dataCount==0 && childCount==1){
 	  	data = subset[0].data;
 		subset = subset[0].subset;
 		dataCount = subset[0].dataCount;
 		childCount = subset[0].childCount;
 	  }
-	  return answer;
+	  return answer;*/
+	  boolean answer=looseRemove(target); //Do the loose Remove
+	  if(dataCount==0&&childCount==1){ //If there's no data in root, but has only one child root=child
+	  	dataCount=subset[0].dataCount; 
+	  	childCount=subset[0].childCount; 
+	  	data=subset[0].data; 
+	  	subset=subset[0].subset; 
+	  }
+	  return answer; 
    }
 
 
@@ -189,7 +198,7 @@ public class IntBalancedSet implements Cloneable
    // such that data[x] >= target. If there is no such location, then the
    // return value is dataCount.
    {
-      // Student will replace this return statement with their own code:
+	  /*Find the first index such that data[i]>=target*/
 	  int index = dataCount;
       for(int i = 0; i<dataCount; i++)
 	  	if(data[i]>=target){
@@ -247,13 +256,12 @@ public class IntBalancedSet implements Cloneable
    //   that the number of entries in the root of this set might be one less than
    //   the allowed minimum.
    {
-      // Implemented by student.
-	  if(i>0 && subset[i-1].dataCount>MINIMUM) transferLeft(i);
-	  else if(i<dataCount-1 && subset[i+1].dataCount>MINIMUM) transferRight(i);
-	  else if(i>0 && subset[i-1].dataCount==MINIMUM) mergeWithNextSubset(i-1);
-	  else if(i<dataCount-1 && subset[i+1].dataCount==MINIMUM) mergeWithNextSubset(i);
+	  /*fix the shortage(there are only MINIMUM-1 elements) for child in index i*/
+	  if(i>0 && subset[i-1].dataCount>MINIMUM) transferLeft(i); //if there are more than MINIMUM elements in left of this child, transferdata from left
+	  else if(i<dataCount && subset[i+1].dataCount>MINIMUM) transferRight(i); //if there are more than MINIMUM elements in right of this child, transferdata from right
+	  else if(i>0 && subset[i-1].dataCount==MINIMUM) mergeWithNextSubset(i-1); // if there are only MINIMUM elements in left of this child, merge the two nodes
+	  else if(i<dataCount && subset[i+1].dataCount==MINIMUM) mergeWithNextSubset(i); // if there are only MINIMUM elements in right of this child, merge the two nodes
    }
-
 
    private void insertData(int insertIndex, int entry)
    // Precondition: 0 <= insertIndex <= dataCount <= MAXIMUM.
@@ -303,7 +311,7 @@ public class IntBalancedSet implements Cloneable
    {
       // Implemented by student.
 	  int i = firstGE(entry); // find first index s.t. data[i]>=entry
-	  if(data[i]==entry) return; // if there are element that same as entry, do noting and return
+	  if(i<dataCount && data[i]==entry) return; // if there are element that same as entry, do noting and return
 	  else if(childCount==0){ // if there are no child, data[i]<-entry and others shifted right to make room
 	  	for(int j=dataCount;j>i;j--){
 			data[j] = data[j-1];
@@ -330,25 +338,27 @@ public class IntBalancedSet implements Cloneable
    {
       // Student will replace this return statement with their own code:
       int i = firstGE(target);
+	  
 	  if(childCount==0){ // root has no children
-	  	if(i==dataCount) return false; //target not found
-		else{ // target found
-			deleteData(i);
-			dataCount--;
+	  	if(data[i]!=target) return false; //target not found
+		else if(data[i]==target){ // target found
+			deleteData(i); //delete target
 			return true;
 		}
+		return false;
 	  }
 	  else{ //root has children
-	  	if(i==dataCount){ // target not found
-	  		boolean answer = subset[i].looseRemove(target);
-			if(answer && subset[i].dataCount < MINIMUM) fixShortage(i);
+	  	if(subset[i].dataCount>0 && data[i]!=target){ // target not found
+	  		boolean answer = subset[i].looseRemove(target); //But possibly subset[i] has target
+			if(subset[i].dataCount < MINIMUM) fixShortage(i); // After loose Remove, if there only MINIMUM-1 elements in subset[i], fixshortage of subset[i]
 			return answer;
 		}
-		else{ // target found
-			data[i] = subset[i].removeBiggest();
-			if(subset[i].dataCount < MINIMUM) fixShortage(i);
+		else if(subset[i].dataCount>0 && data[i]==target){ // target found
+			data[i] = subset[i].removeBiggest(); // copy the Biggest element in subset[i] and remove original one
+			if(subset[i].dataCount < MINIMUM) fixShortage(i); // After removeBiggest, if there only MINIMUM-1 elements in subset[i], fixshortage of subset[i]
 			return true;
 		}
+		return false;
 	  }
    }
 
@@ -367,7 +377,6 @@ public class IntBalancedSet implements Cloneable
       // Transfer data[i] down to the end of subset[i].data. This actually removes the element from the root, so shift data[i+1],data[i+2], and so on, leftward to fill in the gap. Also remember to subtract 1 from dataCount and add 1 to subset[i].dataCount.
 	subset[i].insertData(subset[i].dataCount,data[i]);
 	deleteData(i);
-	
 	// Transfer all the elements and children from subset[i+1] to the end of subset[i]. Remember to update the values of subset[i].dataCount and subset[i].childCount.
 	for(int j=0;j<subset[i+1].childCount;j++){
 		subset[i].insertSubset(subset[i].childCount+j,subset[i+1].subset[j]);
@@ -375,7 +384,6 @@ public class IntBalancedSet implements Cloneable
 	for(int j=0;j<subset[i+1].dataCount;j++){
 		subset[i].insertData(subset[i].dataCount+j,subset[i+1].data[j]);
 	}
-
 	//Disconnect the node subset[i+1] from the B-tree by shifting subset[i+2], subset[i+3], and so on, leftward. Also reduce childCount by 1.
 	deleteSubset(i+1);
    }
@@ -390,6 +398,7 @@ public class IntBalancedSet implements Cloneable
    //   the allowed minimum.
    {
       // Student will replace this return statement with their own code:
+	  if(dataCount<=0) throw new IllegalStateException();
 	  if(childCount==0){
 		  int answer = deleteData(dataCount-1);
 		  return answer;
@@ -414,12 +423,13 @@ public class IntBalancedSet implements Cloneable
    //   subset has been transfered over to be the last subset of subset[i-1].
    //   As a result, the entire B-tree is now valid.
    {
+   	  if(i<=0 || i>=childCount) throw new IllegalArgumentException();
  	  // Transfer data[i-1] down to the front of subset[i].data. Remember to shift over the existing elements to make room and add one to subset[i].dataCount
 	  subset[i].insertData(0,data[i-1]);
 	  
 	  // Transfer the final element of subset[i-1].data up to replace data[i-1] and subtract one from subset[i-1].dataCount
-	  data[i-1] = subset[i-1].data[subset[i-1].dataCount-1];
-	  subset[i-1].deleteData(subset[i-1].dataCount-1);
+	  data[i-1] = subset[i-1].deleteData(subset[i-1].dataCount-1);
+	  
 	  // If subset[i-1] has children, transfer the final child of subset[i-1] over to the front of subset[i]. This involves shifting over the existing array subset[i].subset to make room for the new child at subset[i].subset[0]. Also add 1o to subset[i].childCount and subtract 1 from subset[i-1].childCount
 	  if(subset[i-1].childCount!=0){
 		subset[i].insertSubset(0,subset[i-1].subset[subset[i-1].childCount-1]);
@@ -427,6 +437,7 @@ public class IntBalancedSet implements Cloneable
 	  }
    }
    
+
 
    public void transferRight(int i)
    // Precondition: 
@@ -439,6 +450,7 @@ public class IntBalancedSet implements Cloneable
    //   been transfered over to be the first subset of subset[i+1].
    //   As a result, the entire B-tree is now valid.
    {
+   		if(i+1>=childCount) throw new IllegalArgumentException();
 	  // Transfer data[i] down to the last of subset[i].data. Remember to shift over the existing elements to make room and add one to subset[i].dataCount
 	  subset[i].insertData(subset[i].dataCount,data[i]);
 	  

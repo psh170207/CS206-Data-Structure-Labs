@@ -29,15 +29,10 @@ public class DoubleArraySeq implements Cloneable{
 	{
 		ensureCapacity(items+1);
 		if(isCurrent()){
-			if (curr<items){
-				for(int i=items;i>curr+1;i--)
-					data[i] = data[i-1];
-				data[curr+1]=element;
-				advance();
-			}
-			else
-				data[items]=element;
-				curr = items;
+			for(int i=items;i>curr+1;i--)
+				data[i] = data[i-1];
+			data[curr+1]=element;
+			advance();
 		}
 		else{
 			data[items]=element;
@@ -182,7 +177,6 @@ public class DoubleArraySeq implements Cloneable{
 		double[] trim = new double[items];
 		for(int i=0;i<items;i++)
 			trim[i] = data[i];
-		//System.arraycopy(data,0,trim,0,items);
 		data=trim;
 	}
 	public static DoubleArraySeq reverse(DoubleArraySeq seq)

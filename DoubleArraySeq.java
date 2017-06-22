@@ -1,3 +1,7 @@
+/*
+ * DoubleArraySeq.java - This code implements double array sequence.
+ * 			 Double array sequence is sequence of double elements represented by array.
+ */
 package cs206b;
 
 public class DoubleArraySeq implements Cloneable{
@@ -12,7 +16,8 @@ public class DoubleArraySeq implements Cloneable{
 		items = 0;
 		curr = 0;
 	}
-
+	
+	
 	public DoubleArraySeq(int initialCapacity)
 	{
 		if(initialCapacity>0){
